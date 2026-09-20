@@ -1,8 +1,10 @@
-# VLB3 Customer Portal - STEP 2
+# VLB3 Customer Portal - STEP 3
 
 Customer-facing portal for the VLB3 platform.
 
-This step contains:
+STEP 3 adds the first complete customer dashboard while keeping the backend optional in demo mode.
+
+## Included so far
 
 - React + TypeScript + Vite
 - React Router
@@ -16,23 +18,84 @@ This step contains:
 - customer roles and frontend permissions
 - permission-protected Users route
 - profile + logout
+- dashboard data layer
+- dashboard loading, error and empty states
+- dynamic KPI cards
+- dynamic customer site cards
+- responsive dashboard for desktop, tablet and mobile
+- demo sites and devices modeled independently from React components
 
-## Backend requirement for STEP 2
+## Backend requirement for STEP 3
 
-No backend is required while `VITE_DEMO_MODE=true`.
+No backend is required while:
 
-The authentication layer is already split between demo and real API implementations. When the real NestJS backend is connected later, set `VITE_DEMO_MODE=false` and implement the matching backend endpoints:
+```env
+VITE_DEMO_MODE=true
+```
 
-- `POST /auth/login`
-- `GET /auth/me`
-- `POST /auth/logout`
+The dashboard page calls `src/api/dashboard.ts`.
 
-The real implementation is prepared to use `credentials: include`, so the future backend can keep the persistent refresh session in a Secure HttpOnly cookie.
+In demo mode it reads from:
+
+```text
+src/demo/dashboard.ts
+src/demo/sites.ts
+```
+
+When the real backend is connected, the same page is already prepared to call:
+
+```text
+GET /api/customer/dashboard
+```
+
+with `VITE_DEMO_MODE=false`.
+
+The route can be adjusted later to match the final NestJS API contract without changing the dashboard components.
+
+## Demo dashboard data
+
+Organization:
+
+```text
+Azienda Agricola Demo
+```
+
+Sites:
+
+```text
+Pozzo Nord
+- ONLINE
+- pump RUNNING
+- 40.00 Hz
+- no active alarms
+
+Campo Sud
+- ONLINE
+- pump STOPPED
+- 0.00 Hz
+- no active alarms
+
+Serra 2
+- OFFLINE
+- last contact about 12 minutes ago
+- pump status unavailable
+- no active alarms
+```
+
+The KPI values are calculated from the site data instead of being hardcoded in the page:
+
+```text
+Impianti: 3
+Online: 2
+Pompe attive: 1
+Allarmi: 0
+```
 
 ## Start
 
 ```bash
 cp .env.example .env
+docker compose down
 docker compose build --no-cache
 docker compose up -d
 docker compose ps
@@ -43,8 +106,6 @@ Open:
 ```text
 http://localhost:8080
 ```
-
-The protected root route redirects to `/login` when there is no session.
 
 ## Demo accounts
 
@@ -70,21 +131,45 @@ Expected permissions:
 - Operator: read + pump commands, no users
 - Viewer: read only, no users and no commands
 
-For STEP 2, command buttons are not implemented yet. Their permissions are already modeled and will be consumed by the device controls in STEP 5.
+## STEP 3 checks
 
-## STEP 2 checks
+1. Login with `owner@demo.vlb3.local` / `Demo123!`.
+2. Dashboard must show 3 sites, 2 online, 1 active pump and 0 alarms.
+3. Pozzo Nord must be ONLINE, IN FUNZIONE, 40.00 Hz.
+4. Campo Sud must be ONLINE, FERMA, 0.00 Hz.
+5. Serra 2 must be OFFLINE and show the last connection around 12 minutes ago.
+6. Press `Aggiorna`: data must refresh without replacing the whole page with the initial skeleton.
+7. Press `Vedi tutti`: it must open `/sites`.
+8. Press `Apri impianto`: it must open `/sites/:siteId`.
+9. Test around 390 px width: site cards must become single-column and remain touch friendly.
+10. Refresh the browser while authenticated: the demo session must remain active.
 
-1. Open `/` while logged out: it must redirect to `/login`.
-2. Login as Owner: it must open the Dashboard.
-3. Refresh the browser: the demo session must remain active.
-4. Open `/users` as Owner/Admin: it must work.
-5. Login as Operator/Viewer: the Users link must disappear.
-6. Type `/users` manually as Operator/Viewer: it must redirect to `/`.
-7. Open Profile and press Logout: it must return to `/login`.
-8. Refresh after logout: protected pages must still require login.
+## Architecture introduced in STEP 3
+
+```text
+DashboardPage
+     |
+     v
+useDashboard
+     |
+     v
+api/dashboard.ts
+     |
+     +---- VITE_DEMO_MODE=true ----> demo/dashboard.ts
+     |                                  |
+     |                                  v
+     |                              demo/sites.ts
+     |
+     +---- VITE_DEMO_MODE=false ---> NestJS API
+                                        |
+                                        v
+                              GET /customer/dashboard
+```
+
+This keeps fake data outside React pages and lets the real backend replace the demo source later without rewriting the UI.
 
 ## Security note
 
-The localStorage entry used in STEP 2 contains only a fake demo user and is never intended for production credentials or tokens.
+The localStorage entry used in demo mode contains only a fake demo user and is never intended for production credentials or tokens.
 
-When `VITE_DEMO_MODE=false`, the portal does not persist authentication secrets in localStorage. The future real backend session will use server-side validation and an HttpOnly refresh cookie.
+When `VITE_DEMO_MODE=false`, authentication secrets are not persisted by the portal in localStorage. Multi-tenancy and command permissions will be enforced again by the backend when the real API is connected.

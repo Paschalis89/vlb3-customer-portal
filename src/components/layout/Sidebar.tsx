@@ -1,5 +1,6 @@
 import { Activity } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
+import { appConfig } from '../../config/app';
 import { brandingConfig } from '../../config/branding';
 import { navigationItems } from '../../config/navigation';
 import { usePermissions } from '../../hooks/usePermissions';
@@ -44,7 +45,7 @@ export function Sidebar() {
 
       <div className="sidebar__footer">
         <span>Portale clienti</span>
-        <small>v0.2.0</small>
+        <small>v{appConfig.version}</small>
       </div>
     </aside>
   );
