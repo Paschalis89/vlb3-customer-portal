@@ -12,3 +12,7 @@ export interface CustomerSiteSummary {
   lastSeenAt: string;
   primaryDevice: DeviceSummary | null;
 }
+
+export interface CustomerSiteDetail extends CustomerSiteSummary {
+  devices: DeviceSummary[];
+}

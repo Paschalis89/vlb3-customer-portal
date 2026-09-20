@@ -1,8 +1,8 @@
-# VLB3 Customer Portal - STEP 3
+# VLB3 Customer Portal - STEP 4
 
 Customer-facing portal for the VLB3 platform.
 
-STEP 3 adds the first complete customer dashboard while keeping the backend optional in demo mode.
+STEP 4 implements the complete customer Sites area on top of the demo/API abstraction introduced in STEP 3.
 
 ## Included so far
 
@@ -18,14 +18,23 @@ STEP 3 adds the first complete customer dashboard while keeping the backend opti
 - customer roles and frontend permissions
 - permission-protected Users route
 - profile + logout
-- dashboard data layer
-- dashboard loading, error and empty states
+- dynamic dashboard data layer
 - dynamic KPI cards
-- dynamic customer site cards
-- responsive dashboard for desktop, tablet and mobile
-- demo sites and devices modeled independently from React components
+- dashboard loading/error/empty states
+- customer sites API layer
+- Sites page with search and filters
+- filter by Online / Offline
+- filter by active / stopped pump
+- filter by active alarms
+- responsive sites grid
+- Site detail page
+- site general status
+- location, devices, active pumps and active alarms summary
+- device cards inside each site
+- offline site/device handling
+- loading, refresh, error and no-result states
 
-## Backend requirement for STEP 3
+## Backend requirement for STEP 4
 
 No backend is required while:
 
@@ -33,63 +42,126 @@ No backend is required while:
 VITE_DEMO_MODE=true
 ```
 
-The dashboard page calls `src/api/dashboard.ts`.
-
-In demo mode it reads from:
+The Sites pages use:
 
 ```text
-src/demo/dashboard.ts
+src/api/sites.ts
+```
+
+In demo mode the API layer reads from:
+
+```text
 src/demo/sites.ts
 ```
 
-When the real backend is connected, the same page is already prepared to call:
+When the real NestJS backend is connected, the same UI is prepared for:
 
 ```text
-GET /api/customer/dashboard
+GET /api/customer/sites
+GET /api/customer/sites/:siteId
 ```
 
-with `VITE_DEMO_MODE=false`.
+The exact backend route can still be adjusted later without rewriting the React pages.
 
-The route can be adjusted later to match the final NestJS API contract without changing the dashboard components.
-
-## Demo dashboard data
-
-Organization:
+## Demo organization
 
 ```text
 Azienda Agricola Demo
 ```
 
-Sites:
+Demo sites:
 
 ```text
 Pozzo Nord
 - ONLINE
-- pump RUNNING
+- Pompa principale RUNNING
 - 40.00 Hz
-- no active alarms
+- no alarms
 
 Campo Sud
 - ONLINE
-- pump STOPPED
+- Pompa principale STOPPED
 - 0.00 Hz
-- no active alarms
+- no alarms
 
 Serra 2
 - OFFLINE
 - last contact about 12 minutes ago
-- pump status unavailable
-- no active alarms
+- pump state unavailable
+- no alarms
 ```
 
-The KPI values are calculated from the site data instead of being hardcoded in the page:
+## Sites page
+
+Route:
 
 ```text
-Impianti: 3
-Online: 2
-Pompe attive: 1
-Allarmi: 0
+/sites
 ```
+
+Available controls:
+
+```text
+Search
+Connectivity: All / Online / Offline
+Pump: All / Active / Stopped
+Alarms: All / With alarm
+Reset filters
+Refresh
+```
+
+Search checks:
+
+```text
+site name
+site description
+location label
+```
+
+The result count updates live.
+
+## Site detail
+
+Route examples:
+
+```text
+/sites/site-pozzonord
+/sites/site-camposud
+/sites/site-serra2
+```
+
+The page shows:
+
+```text
+site name
+description
+general Online / Offline status
+area
+device count
+active pump count
+active alarm count
+last update
+devices belonging to the site
+```
+
+Each device card shows only customer-friendly information:
+
+```text
+Online / Offline
+pump state
+frequency
+setpoint
+fault state
+last contact when offline
+```
+
+The `Apri dispositivo` action already routes to:
+
+```text
+/devices/:deviceId
+```
+
+START / STOP / frequency controls remain intentionally in STEP 5.
 
 ## Start
 
@@ -109,7 +181,7 @@ http://localhost:8080
 
 ## Demo accounts
 
-All demo accounts use this password:
+All demo accounts use:
 
 ```text
 Demo123!
@@ -124,52 +196,56 @@ operator@demo.vlb3.local
 viewer@demo.vlb3.local
 ```
 
-Expected permissions:
-
-- Owner: read + pump commands + users
-- Admin: read + pump commands + users
-- Operator: read + pump commands, no users
-- Viewer: read only, no users and no commands
-
-## STEP 3 checks
+## STEP 4 checks
 
 1. Login with `owner@demo.vlb3.local` / `Demo123!`.
-2. Dashboard must show 3 sites, 2 online, 1 active pump and 0 alarms.
-3. Pozzo Nord must be ONLINE, IN FUNZIONE, 40.00 Hz.
-4. Campo Sud must be ONLINE, FERMA, 0.00 Hz.
-5. Serra 2 must be OFFLINE and show the last connection around 12 minutes ago.
-6. Press `Aggiorna`: data must refresh without replacing the whole page with the initial skeleton.
-7. Press `Vedi tutti`: it must open `/sites`.
-8. Press `Apri impianto`: it must open `/sites/:siteId`.
-9. Test around 390 px width: site cards must become single-column and remain touch friendly.
-10. Refresh the browser while authenticated: the demo session must remain active.
+2. Open `/sites`.
+3. Confirm that 3 sites are visible.
+4. Search `Pozzo` and confirm that only Pozzo Nord remains.
+5. Set Connectivity to `Offline` and confirm that only Serra 2 remains.
+6. Set Pump to `Attiva` and confirm that only Pozzo Nord remains.
+7. Set Pump to `Ferma` and confirm that only Campo Sud remains.
+8. Set Alarms to `Con allarme`: the demo currently has zero alarms, therefore the empty result state must appear.
+9. Press `Azzera` and confirm that all 3 sites return.
+10. Open Pozzo Nord and confirm that site status is ONLINE and its device is RUNNING at 40.00 Hz.
+11. Open Campo Sud and confirm that its device is STOPPED at 0.00 Hz.
+12. Open Serra 2 and confirm that the site is OFFLINE and remote controls are described as unavailable.
+13. Press `Apri dispositivo`: `/devices/:deviceId` must open the STEP 5 placeholder.
+14. Test the list and detail pages around 390 px viewport width.
+15. Refresh directly on `/sites/site-pozzonord`: nginx SPA routing must keep the page working.
 
-## Architecture introduced in STEP 3
+## Architecture introduced in STEP 4
 
 ```text
-DashboardPage
-     |
-     v
-useDashboard
-     |
-     v
-api/dashboard.ts
-     |
-     +---- VITE_DEMO_MODE=true ----> demo/dashboard.ts
-     |                                  |
-     |                                  v
-     |                              demo/sites.ts
-     |
-     +---- VITE_DEMO_MODE=false ---> NestJS API
-                                        |
-                                        v
-                              GET /customer/dashboard
+SitesPage
+   |
+   v
+useSites
+   |
+   v
+api/sites.ts
+   |
+   +---- demo mode ----> demo/sites.ts
+   |
+   +---- real mode ----> GET /customer/sites
+
+SiteDetailPage
+   |
+   v
+useSite(siteId)
+   |
+   v
+api/sites.ts
+   |
+   +---- demo mode ----> demo/sites.ts
+   |
+   +---- real mode ----> GET /customer/sites/:siteId
 ```
 
-This keeps fake data outside React pages and lets the real backend replace the demo source later without rewriting the UI.
+Fake data remains outside React components, so STEP 12 can replace the demo data with NestJS responses without redesigning the pages.
 
 ## Security note
 
-The localStorage entry used in demo mode contains only a fake demo user and is never intended for production credentials or tokens.
+Frontend route filtering and UI visibility are convenience features only.
 
-When `VITE_DEMO_MODE=false`, authentication secrets are not persisted by the portal in localStorage. Multi-tenancy and command permissions will be enforced again by the backend when the real API is connected.
+When the real backend is connected, every `siteId`, `deviceId`, telemetry request and command must be restricted server-side using the authenticated user's `organizationId`.
