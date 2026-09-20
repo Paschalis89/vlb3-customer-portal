@@ -12,3 +12,10 @@ export interface DeviceSummary {
   hasFault: boolean;
   lastSeenAt: string;
 }
+
+export interface CustomerDeviceDetail extends DeviceSummary {
+  siteId: string;
+  siteName: string;
+  siteLocationLabel: string;
+  faultMessage: string | null;
+}

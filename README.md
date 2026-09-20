@@ -1,8 +1,8 @@
-# VLB3 Customer Portal - STEP 4
+# VLB3 Customer Portal - STEP 5
 
 Customer-facing portal for the VLB3 platform.
 
-STEP 4 implements the complete customer Sites area on top of the demo/API abstraction introduced in STEP 3.
+STEP 5 implements the main operational device page: remote START/STOP, frequency control from 30 to 50 Hz, confirmation dialogs, role-aware controls and a command lifecycle that waits for the simulated plant acknowledgement before changing the displayed state.
 
 ## Included so far
 
@@ -20,21 +20,26 @@ STEP 4 implements the complete customer Sites area on top of the demo/API abstra
 - profile + logout
 - dynamic dashboard data layer
 - dynamic KPI cards
-- dashboard loading/error/empty states
-- customer sites API layer
-- Sites page with search and filters
-- filter by Online / Offline
-- filter by active / stopped pump
-- filter by active alarms
-- responsive sites grid
+- Sites list with search and filters
 - Site detail page
-- site general status
-- location, devices, active pumps and active alarms summary
 - device cards inside each site
-- offline site/device handling
-- loading, refresh, error and no-result states
+- Device detail page
+- device Online / Offline state
+- pump Running / Stopped / Fault / Unknown state
+- remote START with confirmation
+- remote STOP with confirmation
+- frequency control from 30.00 to 50.00 Hz
+- slider + numeric frequency input + increment/decrement buttons
+- role-aware remote controls
+- offline command blocking
+- START blocking during a fault
+- frequency blocking during a fault
+- command lifecycle: QUEUED / DELIVERED / SUCCEEDED / FAILED / EXPIRED
+- UI updates only after command success / acknowledgement
+- verified customer-facing telemetry only
+- loading, refresh, error and offline states
 
-## Backend requirement for STEP 4
+## Backend requirement for STEP 5
 
 No backend is required while:
 
@@ -42,126 +47,272 @@ No backend is required while:
 VITE_DEMO_MODE=true
 ```
 
-The Sites pages use:
+The device page uses:
 
 ```text
-src/api/sites.ts
+src/api/devices.ts
+src/api/commands.ts
 ```
 
-In demo mode the API layer reads from:
+In demo mode these APIs read from:
 
 ```text
-src/demo/sites.ts
+src/demo/devices.ts
+src/demo/deviceStore.ts
+src/demo/commands.ts
 ```
 
-When the real NestJS backend is connected, the same UI is prepared for:
+The same React page is already prepared for real endpoints such as:
 
 ```text
-GET /api/customer/sites
-GET /api/customer/sites/:siteId
+GET  /api/customer/devices/:deviceId
+POST /api/customer/devices/:deviceId/commands
+GET  /api/customer/commands/:commandId
 ```
 
-The exact backend route can still be adjusted later without rewriting the React pages.
+The final backend route names can still be adjusted during STEP 12 without redesigning the UI.
 
-## Demo organization
+## Important command rule
+
+The portal never declares a command successful only because the server accepted it.
+
+The customer flow is:
 
 ```text
-Azienda Agricola Demo
+START / STOP / SET FREQUENCY
+        |
+        v
+QUEUED
+"Invio comando..."
+        |
+        v
+DELIVERED
+"Comando ricevuto dall'impianto..."
+        |
+        v
+ACK / execution result
+        |
+   +----+----+
+   |         |
+   v         v
+SUCCEEDED   FAILED / EXPIRED
 ```
 
-Demo sites:
+Only after `SUCCEEDED` is the local device state refreshed.
+
+In demo mode the lifecycle is simulated with short delays, but the UI and API abstraction are the same ones intended for the real backend.
+
+## Remote command rules
+
+Customer commands supported by the STEP 5 UI:
 
 ```text
-Pozzo Nord
-- ONLINE
-- Pompa principale RUNNING
-- 40.00 Hz
-- no alarms
-
-Campo Sud
-- ONLINE
-- Pompa principale STOPPED
-- 0.00 Hz
-- no alarms
-
-Serra 2
-- OFFLINE
-- last contact about 12 minutes ago
-- pump state unavailable
-- no alarms
+VLB3_START
+VLB3_STOP
+VLB3_SET_FREQUENCY
 ```
 
-## Sites page
-
-Route:
+Frequency range:
 
 ```text
-/sites
+minimum: 30.00 Hz
+maximum: 50.00 Hz
 ```
 
-Available controls:
+The demo API validates the range again even if the frontend control already prevents normal out-of-range values.
+
+## Roles
+
+`CUSTOMER_OWNER`, `CUSTOMER_ADMIN` and `CUSTOMER_OPERATOR` can use the remote controls.
+
+`CUSTOMER_VIEWER` can open the device and monitor its state, but all remote controls are disabled and the page shows a read-only notice.
+
+The real NestJS backend must later re-check the same permissions server-side. Frontend visibility is not a security boundary.
+
+## Offline handling
+
+For an offline device:
 
 ```text
-Search
-Connectivity: All / Online / Offline
-Pump: All / Active / Stopped
-Alarms: All / With alarm
-Reset filters
-Refresh
+START             disabled
+STOP              disabled
+SET FREQUENCY     disabled
 ```
 
-Search checks:
+The customer sees a clear message explaining that remote controls will return when the plant reconnects.
+
+## Fault handling
+
+When `hasFault=true`:
 
 ```text
-site name
-site description
-location label
+START             disabled
+SET FREQUENCY     disabled
+STOP              still available when meaningful
 ```
 
-The result count updates live.
+The customer sees a customer-friendly fault message rather than raw VLB3/Modbus data.
 
-## Site detail
+## Demo devices
 
-Route examples:
+### Pozzo Nord
 
 ```text
-/sites/site-pozzonord
-/sites/site-camposud
-/sites/site-serra2
+/device: device-pozzonord-main
+ONLINE
+RUNNING
+frequency 40.00 Hz
+setpoint 40.00 Hz
+no fault
 ```
 
-The page shows:
+### Campo Sud
 
 ```text
-site name
-description
-general Online / Offline status
-area
-device count
-active pump count
-active alarm count
-last update
-devices belonging to the site
+/device: device-camposud-main
+ONLINE
+STOPPED
+frequency 0.00 Hz
+setpoint 40.00 Hz
+no fault
 ```
 
-Each device card shows only customer-friendly information:
+### Serra 2
 
 ```text
-Online / Offline
-pump state
-frequency
-setpoint
-fault state
-last contact when offline
+/device: device-serra2-main
+OFFLINE
+pump state unavailable
+last contact about 12 minutes ago
+no fault
 ```
 
-The `Apri dispositivo` action already routes to:
+## Device routes
 
 ```text
-/devices/:deviceId
+/devices/device-pozzonord-main
+/devices/device-camposud-main
+/devices/device-serra2-main
 ```
 
-START / STOP / frequency controls remain intentionally in STEP 5.
+## START test
+
+Open:
+
+```text
+/devices/device-camposud-main
+```
+
+Expected initial state:
+
+```text
+FERMA
+0.00 Hz
+setpoint 40.00 Hz
+```
+
+Press START.
+
+Expected flow:
+
+```text
+confirmation dialog
+QUEUED
+DELIVERED
+SUCCEEDED
+```
+
+Only after `SUCCEEDED` should the page refresh to:
+
+```text
+IN FUNZIONE
+40.00 Hz
+```
+
+## STOP test
+
+Open:
+
+```text
+/devices/device-pozzonord-main
+```
+
+Press STOP and confirm.
+
+Only after `SUCCEEDED` should the state become:
+
+```text
+FERMA
+0.00 Hz
+```
+
+The setpoint remains unchanged.
+
+## Frequency test
+
+On an online, fault-free device with a role allowed to control the plant:
+
+1. move the slider;
+2. use `-` / `+`;
+3. or write the value in the numeric field;
+4. press `Imposta frequenza`.
+
+Example:
+
+```text
+42.50 Hz
+```
+
+Expected lifecycle:
+
+```text
+QUEUED -> DELIVERED -> SUCCEEDED
+```
+
+If the pump is RUNNING, both the setpoint and current demo frequency become 42.50 Hz after success.
+
+If the pump is STOPPED, the setpoint changes but current frequency remains 0.00 Hz.
+
+## Offline test
+
+Open:
+
+```text
+/devices/device-serra2-main
+```
+
+Expected:
+
+```text
+OFFLINE
+START disabled
+STOP disabled
+frequency controls disabled
+```
+
+No remote command should be sendable from the normal UI.
+
+## Viewer test
+
+Login with:
+
+```text
+viewer@demo.vlb3.local
+Demo123!
+```
+
+Open an online device.
+
+Expected:
+
+```text
+state visible
+telemetry visible
+START disabled
+STOP disabled
+frequency controls disabled
+"Modalità sola lettura" visible
+```
 
 ## Start
 
@@ -196,56 +347,45 @@ operator@demo.vlb3.local
 viewer@demo.vlb3.local
 ```
 
-## STEP 4 checks
-
-1. Login with `owner@demo.vlb3.local` / `Demo123!`.
-2. Open `/sites`.
-3. Confirm that 3 sites are visible.
-4. Search `Pozzo` and confirm that only Pozzo Nord remains.
-5. Set Connectivity to `Offline` and confirm that only Serra 2 remains.
-6. Set Pump to `Attiva` and confirm that only Pozzo Nord remains.
-7. Set Pump to `Ferma` and confirm that only Campo Sud remains.
-8. Set Alarms to `Con allarme`: the demo currently has zero alarms, therefore the empty result state must appear.
-9. Press `Azzera` and confirm that all 3 sites return.
-10. Open Pozzo Nord and confirm that site status is ONLINE and its device is RUNNING at 40.00 Hz.
-11. Open Campo Sud and confirm that its device is STOPPED at 0.00 Hz.
-12. Open Serra 2 and confirm that the site is OFFLINE and remote controls are described as unavailable.
-13. Press `Apri dispositivo`: `/devices/:deviceId` must open the STEP 5 placeholder.
-14. Test the list and detail pages around 390 px viewport width.
-15. Refresh directly on `/sites/site-pozzonord`: nginx SPA routing must keep the page working.
-
-## Architecture introduced in STEP 4
+## Architecture introduced in STEP 5
 
 ```text
-SitesPage
-   |
-   v
-useSites
-   |
-   v
-api/sites.ts
-   |
-   +---- demo mode ----> demo/sites.ts
-   |
-   +---- real mode ----> GET /customer/sites
-
-SiteDetailPage
-   |
-   v
-useSite(siteId)
-   |
-   v
-api/sites.ts
-   |
-   +---- demo mode ----> demo/sites.ts
-   |
-   +---- real mode ----> GET /customer/sites/:siteId
+DeviceDetailPage
+      |
+      +---------------------------+
+      |                           |
+      v                           v
+useDevice                    useDeviceCommand
+      |                           |
+      v                           v
+api/devices.ts               api/commands.ts
+      |                           |
+ +----+----+                 +----+----+
+ |         |                 |         |
+ v         v                 v         v
+demo      real              demo      real
+ |         |                 |         |
+ v         v                 v         v
+device    GET               command   POST command
+data      /customer/...      store     GET command status
 ```
 
-Fake data remains outside React components, so STEP 12 can replace the demo data with NestJS responses without redesigning the pages.
+The demo device store is shared with Sites and Dashboard data, so a successful command can be reflected when those pages are loaded again.
 
-## Security note
+## Security note for the real backend
 
-Frontend route filtering and UI visibility are convenience features only.
+When STEP 12 connects NestJS, every command must be validated again server-side:
 
-When the real backend is connected, every `siteId`, `deviceId`, telemetry request and command must be restricted server-side using the authenticated user's `organizationId`.
+```text
+authenticated user
+active user
+organization ownership
+resource belongs to organization
+customer role / permission
+allowed customer command type
+device online state
+fault / safety rules
+frequency 30-50 Hz
+```
+
+The client must never be trusted to provide the authoritative `organizationId`.

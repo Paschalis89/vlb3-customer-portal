@@ -389,3 +389,135 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* STEP 5 - Device detail responsive */
+@media (max-width: 1000px) {
+  .device-hero__main {
+    grid-template-columns: 1.2fr 1fr 1fr;
+  }
+
+  .device-telemetry-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 820px) {
+  .device-controls-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .device-hero__top {
+    padding: 18px 17px 16px;
+  }
+
+  .device-hero__main {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .device-hero__pump-state {
+    grid-column: 1 / -1;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .device-hero__pump-state,
+  .device-hero__metric {
+    padding: 17px;
+  }
+
+  .device-hero__pump-state + .device-hero__metric {
+    border-left: 0;
+  }
+
+  .device-control-card,
+  .device-telemetry-card {
+    padding: 17px;
+  }
+
+  .pump-control-button {
+    min-height: 86px;
+  }
+}
+
+@media (max-width: 520px) {
+  .device-hero__top {
+    align-items: center;
+  }
+
+  .device-hero__pump-icon {
+    width: 44px;
+    height: 44px;
+  }
+
+  .device-hero__main {
+    grid-template-columns: 1fr;
+  }
+
+  .device-hero__pump-state {
+    grid-column: auto;
+  }
+
+  .device-hero__metric + .device-hero__metric,
+  .device-hero__pump-state + .device-hero__metric {
+    border-left: 0;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .pump-control-buttons {
+    grid-template-columns: 1fr 1fr;
+    gap: 9px;
+  }
+
+  .pump-control-button {
+    min-height: 82px;
+  }
+
+  .frequency-slider-row {
+    grid-template-columns: 1fr;
+    gap: 7px;
+  }
+
+  .frequency-slider-row > span {
+    display: none;
+  }
+
+  .frequency-input-row {
+    grid-template-columns: 48px minmax(0, 1fr) 48px;
+  }
+
+  .device-telemetry-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .command-status {
+    flex-wrap: wrap;
+  }
+
+  .command-status__dismiss {
+    width: 100%;
+    padding-top: 4px;
+    text-align: left;
+  }
+
+  .confirm-dialog__backdrop {
+    align-items: end;
+    padding: 0;
+  }
+
+  .confirm-dialog {
+    width: 100%;
+    border-right: 0;
+    border-bottom: 0;
+    border-left: 0;
+    border-radius: 20px 20px 0 0;
+    padding: 23px 20px calc(20px + env(safe-area-inset-bottom));
+  }
+}
+
+@media (max-width: 380px) {
+  .pump-control-buttons,
+  .device-telemetry-grid {
+    grid-template-columns: 1fr;
+  }
+}
