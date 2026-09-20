@@ -1,0 +1,14 @@
+services:
+  customer-portal:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-/api}
+        VITE_APP_NAME: ${VITE_APP_NAME:-VLB3 Remote}
+        VITE_SUPPORT_EMAIL: ${VITE_SUPPORT_EMAIL:-support@example.com}
+        VITE_DEMO_MODE: ${VITE_DEMO_MODE:-true}
+    container_name: vlb3-customer-portal
+    restart: unless-stopped
+    ports:
+      - "${CUSTOMER_PORTAL_PORT:-8080}:80"
