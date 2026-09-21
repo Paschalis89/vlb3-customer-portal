@@ -1,62 +1,12 @@
-import type { AuthUser, LoginCredentials, LoginResult } from '../types/auth';
+import type { LoginCredentials, LoginResult } from '../types/auth';
+import { getDemoUserByEmail, recordDemoUserLogin } from './users';
 
-const DEMO_PASSWORD = 'Demo123!';
+export const DEMO_PASSWORD = 'Demo123!';
 
 export const DEMO_LOGIN = {
   email: 'owner@demo.vlb3.local',
   password: DEMO_PASSWORD,
 } as const;
-
-export const DEMO_ACCOUNTS: ReadonlyArray<{ user: AuthUser; password: string }> = [
-  {
-    user: {
-      id: 'demo-user-owner',
-      email: 'owner@demo.vlb3.local',
-      firstName: 'Mario',
-      lastName: 'Rossi',
-      role: 'CUSTOMER_OWNER',
-      organizationId: 'demo-organization',
-      organizationName: 'Azienda Agricola Demo',
-    },
-    password: DEMO_PASSWORD,
-  },
-  {
-    user: {
-      id: 'demo-user-admin',
-      email: 'admin@demo.vlb3.local',
-      firstName: 'Anna',
-      lastName: 'Bianchi',
-      role: 'CUSTOMER_ADMIN',
-      organizationId: 'demo-organization',
-      organizationName: 'Azienda Agricola Demo',
-    },
-    password: DEMO_PASSWORD,
-  },
-  {
-    user: {
-      id: 'demo-user-operator',
-      email: 'operator@demo.vlb3.local',
-      firstName: 'Luca',
-      lastName: 'Verdi',
-      role: 'CUSTOMER_OPERATOR',
-      organizationId: 'demo-organization',
-      organizationName: 'Azienda Agricola Demo',
-    },
-    password: DEMO_PASSWORD,
-  },
-  {
-    user: {
-      id: 'demo-user-viewer',
-      email: 'viewer@demo.vlb3.local',
-      firstName: 'Giulia',
-      lastName: 'Neri',
-      role: 'CUSTOMER_VIEWER',
-      organizationId: 'demo-organization',
-      organizationName: 'Azienda Agricola Demo',
-    },
-    password: DEMO_PASSWORD,
-  },
-] as const;
 
 const DEMO_DELAY_MS = 450;
 
@@ -69,16 +19,27 @@ function wait(ms: number): Promise<void> {
 export async function demoLogin(credentials: LoginCredentials): Promise<LoginResult> {
   await wait(DEMO_DELAY_MS);
 
-  const email = credentials.email.trim().toLowerCase();
-  const account = DEMO_ACCOUNTS.find(
-    (candidate) => candidate.user.email === email && candidate.password === credentials.password,
-  );
+  const user = getDemoUserByEmail(credentials.email);
 
-  if (!account) {
+  if (!user || credentials.password !== DEMO_PASSWORD) {
     throw new Error('Email o password non corretti.');
   }
 
-  return { user: account.user };
+  if (user.status === 'INVITED') {
+    throw new Error('L’invito non è stato ancora accettato.');
+  }
+
+  if (user.status === 'DISABLED') {
+    throw new Error('Questo account è stato disattivato.');
+  }
+
+  const authUser = recordDemoUserLogin(user.id);
+
+  if (!authUser) {
+    throw new Error('Accesso non disponibile per questo account.');
+  }
+
+  return { user: authUser };
 }
 
 export async function demoLogout(): Promise<void> {

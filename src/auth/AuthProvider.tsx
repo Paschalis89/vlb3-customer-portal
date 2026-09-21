@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react
 import { getCurrentUser, login as loginRequest, logout as logoutRequest } from '../api/auth';
 import { appConfig } from '../config/app';
 import { clearDemoSession, readDemoSession, writeDemoSession } from '../demo/session';
+import { getDemoAuthUserById } from '../demo/users';
 import type { AuthUser, LoginCredentials } from '../types/auth';
 import { AuthContext, type AuthContextValue } from './AuthContext';
 
@@ -20,9 +21,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
     async function restoreSession() {
       try {
         if (appConfig.demoMode) {
+          const storedSession = readDemoSession();
+          const currentUser = storedSession ? getDemoAuthUserById(storedSession.id) : null;
+
           if (active) {
-            setUser(readDemoSession());
+            setUser(currentUser);
           }
+
+          if (currentUser) {
+            writeDemoSession(currentUser);
+          } else if (storedSession) {
+            clearDemoSession();
+          }
+
           return;
         }
 
