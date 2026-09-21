@@ -1,8 +1,8 @@
-# VLB3 Customer Portal - STEP 6
+# VLB3 Customer Portal - STEP 7
 
 Customer-facing portal for the VLB3 platform.
 
-STEP 6 adds customer-facing telemetry history and responsive charts while preserving the STEP 5 remote-control flow. The portal now supports 1 hour, 24 hour, 7 day and 30 day views for verified frequency and pump state data without exposing unverified raw VLB3 engineering values.
+STEP 7 adds the customer-facing Alerts area while preserving telemetry and remote-control flows from the previous steps. The portal now separates active alarms from resolved history, provides customer-friendly severity filters and never exposes Modbus codes or internal diagnostics to the customer.
 
 ## Included so far
 
@@ -43,9 +43,15 @@ STEP 6 adds customer-facing telemetry history and responsive charts while preser
 - telemetry summary metrics
 - offline telemetry gaps are shown as missing data rather than fabricated realtime values
 - Recharts-based responsive charts
-- loading, refresh, error and offline states
+- customer Alerts page
+- active alarms and resolved history
+- Critical / Warning / Resolved filters
+- customer-friendly alert messages
+- alert detail dialog with recommended action and resolution
+- technical alert codes translated before reaching the customer UI
+- loading, refresh, error, empty and offline states
 
-## Backend requirement for STEP 6
+## Backend requirement for STEP 7
 
 No backend is required while:
 
@@ -53,28 +59,25 @@ No backend is required while:
 VITE_DEMO_MODE=true
 ```
 
-The device page uses:
+The portal keeps the API abstraction used in the previous steps and adds:
 
 ```text
-src/api/devices.ts
-src/api/commands.ts
+src/api/alerts.ts
 ```
 
-In demo mode these APIs read from:
+In demo mode alert data comes from:
 
 ```text
-src/demo/devices.ts
-src/demo/deviceStore.ts
-src/demo/commands.ts
+src/demo/alerts.ts
 ```
 
-The same React page is already prepared for real endpoints such as:
+The real-mode contract is already isolated behind:
 
 ```text
-GET  /api/customer/devices/:deviceId
-POST /api/customer/devices/:deviceId/commands
-GET  /api/customer/commands/:commandId
+GET /api/customer/alerts
 ```
+
+Device control and telemetry continue to use their existing API layers unchanged.
 
 The final backend route names can still be adjusted during STEP 12 without redesigning the UI.
 
@@ -482,3 +485,105 @@ Then open:
 ```
 
 The device must still be clearly OFFLINE and the graph must contain a visible data gap after the last contact instead of extending old telemetry to the present.
+
+
+## STEP 7 alerts architecture
+
+The Alerts page loads data through:
+
+```text
+src/pages/AlertsPage.tsx
+        |
+        v
+src/hooks/useAlerts.ts
+        |
+        v
+src/api/alerts.ts
+        |
+   +----+----+
+   |         |
+   v         v
+ demo       real
+   |         |
+   v         v
+src/demo/   GET /api/customer/alerts
+alerts.ts
+```
+
+The demo currently keeps the original presentation scenario with:
+
+```text
+0 active alarms
+4 resolved historical alarms
+```
+
+This preserves the initial demo dashboard requirement while making the complete Alerts UI testable.
+
+Internal demo events are created from technical codes such as:
+
+```text
+MODBUS_CONNECTION_ERROR
+COMMUNICATION_SIGNAL_WEAK
+DEVICE_OFFLINE
+VLB3_FAULT
+```
+
+The customer UI never displays those codes. They are converted into messages such as:
+
+```text
+Comunicazione non disponibile
+Collegamento instabile
+Impianto temporaneamente offline
+Pompa in allarme
+```
+
+In production this translation should preferably be performed or validated by the backend so the Customer Portal receives an already sanitized customer DTO.
+
+## STEP 7 test
+
+Build and start:
+
+```bash
+docker compose down
+docker compose build --no-cache
+docker compose up -d
+docker compose ps
+```
+
+Open:
+
+```text
+/alerts
+```
+
+Expected initial state:
+
+```text
+Critici attivi: 0
+Warning attivi: 0
+Risolti: 4
+```
+
+The `Attivi` tab must show the all-clear empty state.
+
+Open `Storico` and verify:
+
+```text
+Tutti    -> 4 events
+Critici  -> 2 events
+Warning  -> 2 events
+Risolti  -> 4 events
+```
+
+Open an alert detail and verify that the modal shows only customer-facing information:
+
+```text
+severity
+site / device
+message
+date and time
+recommended action
+resolution
+```
+
+No Modbus register, raw error, serial-port detail, token or internal diagnostic information should appear.

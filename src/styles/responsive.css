@@ -594,3 +594,108 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* STEP 7 - Alerts responsive */
+@media (max-width: 1050px) {
+  .alerts-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .alerts-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .alerts-summary-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .alert-summary-card {
+    padding: 15px;
+  }
+
+  .alert-summary-card:last-child {
+    grid-column: 1 / -1;
+  }
+
+  .alerts-panel {
+    padding: 17px;
+  }
+
+  .alerts-toolbar {
+    margin-top: 16px;
+  }
+
+  .alerts-view-tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .alerts-filter-tabs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .alerts-view-tab,
+  .alerts-filter-tab {
+    min-height: 44px;
+  }
+
+  .alert-detail__backdrop {
+    align-items: end;
+    padding: 0;
+  }
+
+  .alert-detail {
+    width: 100%;
+    max-height: 92vh;
+    border-right: 0;
+    border-bottom: 0;
+    border-left: 0;
+    border-radius: 20px 20px 0 0;
+    padding: 21px 18px calc(18px + env(safe-area-inset-bottom));
+  }
+}
+
+@media (max-width: 520px) {
+  .alerts-summary-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .alert-summary-card__icon {
+    width: 34px;
+    height: 34px;
+    margin-bottom: 14px;
+  }
+
+  .alert-summary-card > strong {
+    font-size: 1.5rem;
+  }
+
+  .alert-card__top {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .alert-card__relative-time {
+    white-space: normal;
+  }
+
+  .alert-detail__timeline {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 380px) {
+  .alerts-summary-grid,
+  .alerts-filter-tabs {
+    grid-template-columns: 1fr;
+  }
+
+  .alert-summary-card:last-child {
+    grid-column: auto;
+  }
+}
