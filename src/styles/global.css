@@ -4053,3 +4053,139 @@ a {
   height: 36px;
   justify-self: end;
 }
+
+/* STEP 10 - PWA */
+
+.network-status-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  border-bottom: 1px solid rgba(242, 184, 75, 0.25);
+  background: rgba(83, 58, 14, 0.92);
+  padding: 11px 30px;
+  color: #f3d691;
+}
+
+.network-status-banner > svg {
+  flex: 0 0 auto;
+  margin-top: 1px;
+}
+
+.network-status-banner strong,
+.network-status-banner span {
+  display: block;
+}
+
+.network-status-banner strong {
+  font-size: 0.78rem;
+}
+
+.network-status-banner span {
+  margin-top: 3px;
+  color: #ddc991;
+  font-size: 0.72rem;
+  line-height: 1.45;
+}
+
+.pwa-install-card {
+  grid-column: 1 / -1;
+}
+
+.pwa-install-card__heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+}
+
+.pwa-install-card__icon {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid rgba(53, 208, 127, 0.22);
+  border-radius: 14px;
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+
+.pwa-install-card__heading .content-card__label {
+  margin-bottom: 6px;
+}
+
+.pwa-install-card__heading p {
+  max-width: 720px;
+  margin: 9px 0 0;
+  color: var(--color-text-muted);
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+
+.pwa-install-card__features {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.pwa-install-card__features > div {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 46px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.018);
+  padding: 10px 12px;
+  color: var(--color-text-soft);
+  font-size: 0.76rem;
+}
+
+.pwa-install-card__features svg {
+  flex: 0 0 auto;
+  color: var(--color-primary);
+}
+
+.pwa-install-button {
+  margin-top: 18px;
+}
+
+.pwa-install-state {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 18px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 12px 13px;
+  color: var(--color-text-soft);
+}
+
+.pwa-install-state > svg {
+  flex: 0 0 auto;
+  margin-top: 1px;
+  color: var(--color-primary);
+}
+
+.pwa-install-state strong,
+.pwa-install-state span {
+  display: block;
+}
+
+.pwa-install-state strong {
+  color: var(--color-text);
+  font-size: 0.78rem;
+}
+
+.pwa-install-state span {
+  margin-top: 4px;
+  color: var(--color-text-muted);
+  font-size: 0.74rem;
+  line-height: 1.5;
+}
+
+.pwa-install-state--success {
+  border-color: rgba(53, 208, 127, 0.22);
+  background: var(--color-primary-soft);
+}

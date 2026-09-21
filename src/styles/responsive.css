@@ -993,3 +993,37 @@
     flex-direction: column;
   }
 }
+
+/* STEP 10 - PWA responsive and safe areas */
+@media (max-width: 760px) {
+  .topbar {
+    min-height: calc(var(--topbar-height) + env(safe-area-inset-top));
+    padding: env(safe-area-inset-top) max(16px, env(safe-area-inset-right)) 0
+      max(16px, env(safe-area-inset-left));
+  }
+
+  .network-status-banner {
+    padding: 10px max(16px, env(safe-area-inset-right)) 10px
+      max(16px, env(safe-area-inset-left));
+  }
+
+  .app-content {
+    padding-right: max(16px, env(safe-area-inset-right));
+    padding-bottom: calc(var(--mobile-nav-height) + 28px + env(safe-area-inset-bottom));
+    padding-left: max(16px, env(safe-area-inset-left));
+  }
+
+  .pwa-install-card__features {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 460px) {
+  .pwa-install-card__heading {
+    flex-direction: column;
+  }
+
+  .pwa-install-button {
+    width: 100%;
+  }
+}

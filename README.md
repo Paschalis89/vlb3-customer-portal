@@ -217,3 +217,57 @@ Suggested checks:
 ```text
 0.9.0
 ```
+
+---
+
+## STEP 10 - PWA
+
+Versione: `0.10.0`
+
+Il Customer Portal è ora predisposto come Progressive Web App installabile.
+
+### Funzionalità aggiunte
+
+- manifest generato durante il build usando `VITE_APP_NAME`;
+- icone 192x192, 512x512, maskable e Apple Touch Icon;
+- service worker registrato solo nel build di produzione;
+- modalità `standalone`;
+- supporto "Aggiungi alla schermata Home";
+- prompt di installazione sui browser Chromium compatibili;
+- istruzioni dedicate per Safari su iPhone/iPad;
+- banner globale quando il browser è offline;
+- supporto safe-area per dispositivi con notch/home indicator;
+- aggiornamento del service worker senza caching aggressivo dei dati dinamici.
+
+### Strategia cache
+
+Il service worker può memorizzare la shell dell'app e gli asset statici necessari per riaprire il portale.
+
+Non mette in cache le richieste `/api`, quindi telemetria, allarmi, stato comandi e altri dati dinamici non vengono mai serviti dalla cache come se fossero realtime.
+
+In assenza di connessione il portale mostra un avviso esplicito.
+
+### Test PWA in Docker
+
+```bash
+docker compose down
+docker compose build --no-cache
+docker compose up -d
+docker compose ps
+```
+
+Aprire quindi il portale su HTTPS quando viene pubblicato sul server. In locale `localhost` è considerato un contesto sicuro dai browser moderni per lo sviluppo PWA.
+
+Per verificare il manifest:
+
+```bash
+curl -i http://localhost:8080/manifest.webmanifest
+```
+
+Per verificare il service worker:
+
+```bash
+curl -i http://localhost:8080/sw.js
+```
+
+Nel browser usare DevTools > Application per controllare Manifest e Service Workers.

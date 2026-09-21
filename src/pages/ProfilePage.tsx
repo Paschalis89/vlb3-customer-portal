@@ -1,6 +1,7 @@
 import { LogOut, Mail, ShieldCheck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { customerRoleLabels } from '../auth/permissions';
+import { PwaInstallCard } from '../components/pwa/PwaInstallCard';
 import { PageHeader } from '../components/ui/PageHeader';
 import { brandingConfig } from '../config/branding';
 import { useAuth } from '../hooks/useAuth';
@@ -19,7 +20,7 @@ export function ProfilePage() {
       <PageHeader
         eyebrow="Account"
         title="Profilo"
-        description="Informazioni personali e impostazioni dell'account."
+        description="Informazioni personali, installazione app e impostazioni dell'account."
       />
 
       <div className="profile-grid">
@@ -64,6 +65,8 @@ export function ProfilePage() {
             <span>Accesso protetto e permessi separati per ruolo cliente</span>
           </div>
         </article>
+
+        <PwaInstallCard />
       </div>
     </div>
   );
