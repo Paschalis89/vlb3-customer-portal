@@ -7,7 +7,7 @@ const parseBoolean = (value: string | undefined, fallback: boolean): boolean => 
 };
 
 export const appConfig = {
-  version: '0.7.0',
+  version: '0.8.0',
   apiBaseUrl: import.meta.env.VITE_API_BASE_URL ?? '/api',
   demoMode: parseBoolean(import.meta.env.VITE_DEMO_MODE, true),
 } as const;

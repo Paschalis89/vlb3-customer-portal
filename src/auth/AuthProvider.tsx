@@ -1,28 +1,12 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { getCurrentUser, login as loginRequest, logout as logoutRequest } from '../api/auth';
 import { appConfig } from '../config/app';
+import { clearDemoSession, readDemoSession, writeDemoSession } from '../demo/session';
 import type { AuthUser, LoginCredentials } from '../types/auth';
 import { AuthContext, type AuthContextValue } from './AuthContext';
 
-const DEMO_SESSION_KEY = 'vlb3-customer-portal.demo-session';
-
 interface AuthProviderProps {
   children: ReactNode;
-}
-
-function readDemoSession(): AuthUser | null {
-  const stored = window.localStorage.getItem(DEMO_SESSION_KEY);
-
-  if (!stored) {
-    return null;
-  }
-
-  try {
-    return JSON.parse(stored) as AuthUser;
-  } catch {
-    window.localStorage.removeItem(DEMO_SESSION_KEY);
-    return null;
-  }
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
@@ -72,7 +56,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setUser(result.user);
 
       if (appConfig.demoMode) {
-        window.localStorage.setItem(DEMO_SESSION_KEY, JSON.stringify(result.user));
+        writeDemoSession(result.user);
       }
     } finally {
       setIsSubmitting(false);
@@ -86,7 +70,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       await logoutRequest();
     } finally {
       if (appConfig.demoMode) {
-        window.localStorage.removeItem(DEMO_SESSION_KEY);
+        clearDemoSession();
       }
 
       setUser(null);

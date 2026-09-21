@@ -699,3 +699,96 @@
     grid-column: auto;
   }
 }
+
+/* STEP 8 - History responsive */
+@media (max-width: 900px) {
+  .history-toolbar,
+  .history-skeleton__toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .history-site-filter {
+    width: 100%;
+  }
+}
+
+@media (max-width: 760px) {
+  .history-panel {
+    padding: 17px;
+  }
+
+  .history-filter-row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .history-filter-tabs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .history-filter-tab {
+    min-height: 44px;
+    border-radius: 11px;
+  }
+
+  .history-reset {
+    align-self: flex-start;
+    min-height: 40px;
+  }
+}
+
+@media (max-width: 520px) {
+  .history-day__heading {
+    align-items: flex-start;
+  }
+
+  .history-event {
+    grid-template-columns: 40px minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .history-day__events::before {
+    left: 19px;
+  }
+
+  .history-event__marker {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+  }
+
+  .history-event__body {
+    padding: 13px 14px;
+  }
+
+  .history-event__top {
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .history-event__relative {
+    white-space: normal;
+  }
+
+  .history-event__meta {
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  .history-skeleton__row {
+    grid-template-columns: 40px minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .skeleton--history-dot {
+    width: 38px;
+    height: 38px;
+  }
+}
+
+@media (max-width: 380px) {
+  .history-filter-tabs {
+    grid-template-columns: 1fr;
+  }
+}

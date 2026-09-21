@@ -3,6 +3,7 @@ import {
   updateDemoDeviceFrequency,
   updateDemoDevicePumpState,
 } from './deviceStore';
+import { recordDemoCommandHistory } from './history';
 import type {
   CreateCustomerCommandRequest,
   CustomerCommand,
@@ -78,6 +79,7 @@ function applySuccessfulCommand(command: DemoCommandRecord): void {
   }
 
   command.applied = true;
+  recordDemoCommandHistory(command);
 }
 
 function cloneCommand(command: DemoCommandRecord): CustomerCommand {
