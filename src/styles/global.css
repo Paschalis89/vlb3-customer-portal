@@ -2307,3 +2307,209 @@ a {
   height: 150px;
   border-radius: var(--radius-md);
 }
+
+/* STEP 6 - Telemetry history and charts */
+.telemetry-history-card {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: linear-gradient(145deg, var(--color-surface), var(--color-background-elevated));
+  padding: 20px;
+  box-shadow: var(--shadow-card);
+}
+
+.telemetry-history__header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.telemetry-history__header h2 {
+  margin: 0;
+  font-size: 1.18rem;
+}
+
+.telemetry-range-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.telemetry-range-tab {
+  min-height: 38px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.018);
+  padding: 0 13px;
+  color: var(--color-text-muted);
+  font-size: 0.76rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition:
+    border-color 140ms ease,
+    background 140ms ease,
+    color 140ms ease;
+}
+
+.telemetry-range-tab:hover {
+  border-color: var(--color-border-strong);
+  color: var(--color-text);
+}
+
+.telemetry-range-tab--active {
+  border-color: rgba(53, 208, 127, 0.28);
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+
+.telemetry-offline-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 12px 14px;
+  color: var(--color-text-muted);
+  font-size: 0.76rem;
+  line-height: 1.5;
+}
+
+.telemetry-offline-note svg {
+  flex: 0 0 auto;
+  margin-top: 1px;
+  color: var(--color-warning);
+}
+
+.telemetry-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.telemetry-stats-grid > div {
+  position: relative;
+  min-width: 0;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 13px;
+}
+
+.telemetry-stats-grid svg {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  color: var(--color-primary);
+}
+
+.telemetry-stats-grid span,
+.telemetry-stats-grid strong {
+  display: block;
+}
+
+.telemetry-stats-grid span {
+  padding-right: 22px;
+  color: var(--color-text-muted);
+  font-size: 0.7rem;
+}
+
+.telemetry-stats-grid strong {
+  margin-top: 8px;
+  color: var(--color-text);
+  font-size: 0.88rem;
+}
+
+.telemetry-chart-card {
+  margin-top: 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  background: rgba(5, 13, 10, 0.42);
+  padding: 16px 16px 10px;
+  overflow: hidden;
+}
+
+.telemetry-chart-card__heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.telemetry-chart-card__heading > div > span,
+.telemetry-chart-card__heading > div > strong {
+  display: block;
+}
+
+.telemetry-chart-card__heading > div > span {
+  color: var(--color-text-muted);
+  font-size: 0.72rem;
+}
+
+.telemetry-chart-card__heading > div > strong {
+  margin-top: 3px;
+  font-size: 0.9rem;
+}
+
+.telemetry-chart-card__legend {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--color-text-muted);
+  font-size: 0.7rem;
+}
+
+.telemetry-chart-card__legend i {
+  width: 16px;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--color-primary);
+}
+
+.telemetry-chart {
+  width: 100%;
+  height: 285px;
+}
+
+.telemetry-chart--state {
+  height: 190px;
+}
+
+.telemetry-chart .recharts-surface {
+  overflow: visible;
+}
+
+.telemetry-chart .recharts-default-tooltip {
+  color: var(--color-text);
+}
+
+.telemetry-history__footnote {
+  margin: 15px 0 0;
+  border-top: 1px solid var(--color-border);
+  padding-top: 13px;
+  color: var(--color-text-muted);
+  font-size: 0.72rem;
+  line-height: 1.55;
+}
+
+.skeleton--telemetry-history-heading {
+  display: block;
+  width: 32%;
+  height: 24px;
+}
+
+.skeleton--telemetry-history-chart {
+  display: block;
+  width: 100%;
+  height: 320px;
+  margin-top: 18px;
+  border-radius: 14px;
+}
+
+.skeleton--telemetry-history-chart-small {
+  height: 210px;
+}

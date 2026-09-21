@@ -521,3 +521,76 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* STEP 6 - Telemetry responsive */
+@media (max-width: 1000px) {
+  .telemetry-stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .telemetry-history-card {
+    padding: 17px;
+  }
+
+  .telemetry-history__header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .telemetry-history__header .button {
+    width: 100%;
+  }
+
+  .telemetry-range-tabs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .telemetry-range-tab {
+    min-height: 44px;
+  }
+
+  .telemetry-chart-card {
+    margin-right: -5px;
+    margin-left: -5px;
+    padding-right: 7px;
+    padding-left: 7px;
+  }
+
+  .telemetry-chart-card__heading {
+    padding: 0 9px;
+  }
+
+  .telemetry-chart {
+    height: 260px;
+  }
+
+  .telemetry-chart--state {
+    height: 185px;
+  }
+}
+
+@media (max-width: 520px) {
+  .telemetry-stats-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .telemetry-chart-card__heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .telemetry-chart {
+    height: 245px;
+  }
+}
+
+@media (max-width: 380px) {
+  .telemetry-stats-grid,
+  .telemetry-range-tabs {
+    grid-template-columns: 1fr;
+  }
+}

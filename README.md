@@ -1,8 +1,8 @@
-# VLB3 Customer Portal - STEP 5
+# VLB3 Customer Portal - STEP 6
 
 Customer-facing portal for the VLB3 platform.
 
-STEP 5 implements the main operational device page: remote START/STOP, frequency control from 30 to 50 Hz, confirmation dialogs, role-aware controls and a command lifecycle that waits for the simulated plant acknowledgement before changing the displayed state.
+STEP 6 adds customer-facing telemetry history and responsive charts while preserving the STEP 5 remote-control flow. The portal now supports 1 hour, 24 hour, 7 day and 30 day views for verified frequency and pump state data without exposing unverified raw VLB3 engineering values.
 
 ## Included so far
 
@@ -37,9 +37,15 @@ STEP 5 implements the main operational device page: remote START/STOP, frequency
 - command lifecycle: QUEUED / DELIVERED / SUCCEEDED / FAILED / EXPIRED
 - UI updates only after command success / acknowledgement
 - verified customer-facing telemetry only
+- telemetry history data layer
+- frequency chart with 1h / 24h / 7d / 30d filters
+- pump RUNNING / STOPPED history chart
+- telemetry summary metrics
+- offline telemetry gaps are shown as missing data rather than fabricated realtime values
+- Recharts-based responsive charts
 - loading, refresh, error and offline states
 
-## Backend requirement for STEP 5
+## Backend requirement for STEP 6
 
 No backend is required while:
 
@@ -104,7 +110,7 @@ In demo mode the lifecycle is simulated with short delays, but the UI and API ab
 
 ## Remote command rules
 
-Customer commands supported by the STEP 5 UI:
+Customer commands supported by the current UI:
 
 ```text
 VLB3_START
@@ -389,3 +395,90 @@ frequency 30-50 Hz
 ```
 
 The client must never be trusted to provide the authoritative `organizationId`.
+
+
+## STEP 6 telemetry architecture
+
+The device page loads telemetry through:
+
+```text
+src/api/telemetry.ts
+       |
+       +-- demo mode -> src/demo/telemetry.ts
+       |
+       +-- real mode -> GET /api/customer/devices/:deviceId/telemetry?range=24h
+```
+
+Supported ranges:
+
+```text
+1h
+24h
+7d
+30d
+```
+
+The demo series is deterministic and derived from the current demo device state. The final sample for an online device reflects the current state after a successful START, STOP or SET FREQUENCY command.
+
+For an offline device the series stops at the last known contact and newer samples are represented as missing. The portal never fills a connectivity gap with fake realtime values.
+
+## Charts
+
+STEP 6 uses Recharts for responsive React charts.
+
+The device page now contains:
+
+```text
+ANDAMENTO
+
+[Ultima ora] [24 ore] [7 giorni] [30 giorni]
+
+- Frequenza (Hz nel tempo)
+- Stato pompa (RUN / STOP nel tempo)
+```
+
+Customer-facing telemetry remains intentionally limited to verified values:
+
+```text
+visible now:
+- frequency
+- setpoint
+- pump state
+- fault state
+- connectivity / last seen
+
+hidden until VLB3 scale verification:
+- motor voltage
+- current
+- inverter temperature
+- DC Bus
+- torque
+- power
+```
+
+## STEP 6 test
+
+Build and start:
+
+```bash
+docker compose down
+docker compose build --no-cache
+docker compose up -d
+docker compose ps
+```
+
+Then open:
+
+```text
+/devices/device-pozzonord-main
+```
+
+Verify that all four telemetry ranges load and that frequency ends close to the current 40 Hz state.
+
+Then open:
+
+```text
+/devices/device-serra2-main
+```
+
+The device must still be clearly OFFLINE and the graph must contain a visible data gap after the last contact instead of extending old telemetry to the present.

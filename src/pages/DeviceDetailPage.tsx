@@ -14,16 +14,19 @@ import { CommandStatusPanel } from '../components/commands/CommandStatusPanel';
 import { ConfirmDialog } from '../components/commands/ConfirmDialog';
 import { FrequencyControl } from '../components/devices/FrequencyControl';
 import { PumpControls } from '../components/devices/PumpControls';
+import { TelemetryHistory } from '../components/telemetry/TelemetryHistory';
 import { ErrorState } from '../components/ui/ErrorState';
 import { PageHeader } from '../components/ui/PageHeader';
 import { Skeleton } from '../components/ui/Skeleton';
 import { StatusBadge } from '../components/ui/StatusBadge';
 import { useDevice } from '../hooks/useDevice';
 import { useDeviceCommand } from '../hooks/useDeviceCommand';
+import { useDeviceTelemetry } from '../hooks/useDeviceTelemetry';
 import { usePermissions } from '../hooks/usePermissions';
 import { formatRelativeTime } from '../lib/date';
 import type { CreateCustomerCommandRequest } from '../types/command';
 import type { PumpState } from '../types/device';
+import type { TelemetryRange } from '../types/telemetry';
 
 type ConfirmationAction = 'START' | 'STOP' | null;
 
@@ -62,10 +65,18 @@ export function DeviceDetailPage() {
   const { device, error, isLoading, isRefreshing, refresh } = useDevice(deviceId);
   const { can } = usePermissions();
   const [confirmation, setConfirmation] = useState<ConfirmationAction>(null);
+  const [telemetryRange, setTelemetryRange] = useState<TelemetryRange>('24h');
+  const {
+    telemetry,
+    error: telemetryError,
+    isLoading: isTelemetryLoading,
+    isRefreshing: isTelemetryRefreshing,
+    refresh: refreshTelemetry,
+  } = useDeviceTelemetry(deviceId, telemetryRange);
 
   const handleCommandSucceeded = useCallback(async () => {
-    await refresh();
-  }, [refresh]);
+    await Promise.all([refresh(), refreshTelemetry()]);
+  }, [refresh, refreshTelemetry]);
 
   const command = useDeviceCommand(deviceId ?? '', {
     onSucceeded: handleCommandSucceeded,
@@ -132,11 +143,14 @@ export function DeviceDetailPage() {
         actions={
           <button
             className="button button--secondary button--compact"
-            disabled={isRefreshing}
-            onClick={() => void refresh()}
+            disabled={isRefreshing || isTelemetryRefreshing}
+            onClick={() => void Promise.all([refresh(), refreshTelemetry()])}
             type="button"
           >
-            <RefreshCw className={isRefreshing ? 'spin' : undefined} size={16} />
+            <RefreshCw
+              className={isRefreshing || isTelemetryRefreshing ? 'spin' : undefined}
+              size={16}
+            />
             Aggiorna
           </button>
         }
@@ -293,6 +307,17 @@ export function DeviceDetailPage() {
           </div>
         </div>
       </section>
+
+      <TelemetryHistory
+        error={telemetryError}
+        isLoading={isTelemetryLoading}
+        isOffline={isOffline}
+        isRefreshing={isTelemetryRefreshing}
+        onRangeChange={setTelemetryRange}
+        onRefresh={() => void refreshTelemetry()}
+        range={telemetryRange}
+        telemetry={telemetry}
+      />
 
       <ConfirmDialog
         confirmLabel={confirmation === 'STOP' ? 'Arresta' : 'Avvia'}
